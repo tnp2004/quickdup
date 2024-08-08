@@ -5,17 +5,20 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/tnp2004/quickdup/configs"
+	"github.com/tnp2004/quickdup/pkg/databases"
 )
 
 type Server struct {
 	cfg    *configs.Config
 	server *echo.Echo
+	db     databases.Database
 }
 
-func NewServer(cfg *configs.Config) *Server {
+func NewServer(cfg *configs.Config, db databases.Database) *Server {
 	return &Server{
 		cfg:    cfg,
 		server: echo.New(),
+		db:     db,
 	}
 }
 

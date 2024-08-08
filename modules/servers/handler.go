@@ -10,6 +10,18 @@ func (s *Server) RegisterRoutes() {
 	app := s.server
 
 	app.GET("/health", func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK")
+		var healthResp struct {
+			Server   string `json:"server"`
+			Database string `json:"database"`
+		}
+
+		healthResp.Server = "OK"
+		if err := s.db.HealthCheck(); err != nil {
+			healthResp.Database = "NOT OK"
+		} else {
+			healthResp.Database = "OK"
+		}
+
+		return c.JSON(http.StatusOK, healthResp)
 	})
 }
