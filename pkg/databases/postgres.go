@@ -15,11 +15,6 @@ type Postgres struct {
 	*sql.DB
 }
 
-type Database interface {
-	Conn() *sql.Conn
-	HealthCheck() error
-}
-
 func NewPostgresDB(cfg *configs.Database) Database {
 	connStr := fmt.Sprintf("dbname=%s user=%s password=%s host=%s port=%s sslmode=%s",
 		cfg.Name, cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.Sslmode)
