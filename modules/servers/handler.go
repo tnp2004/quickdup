@@ -7,9 +7,13 @@ import (
 )
 
 func (s *Server) RegisterRoutes() {
-	app := s.server
+	_ = s.server
 
-	app.GET("/health", func(c echo.Context) error {
+	s.healthRoutes()
+}
+
+func (s *Server) healthRoutes() {
+	s.server.GET("/health", func(c echo.Context) error {
 		var healthResp struct {
 			Server   string `json:"server"`
 			Database string `json:"database"`
