@@ -27,7 +27,6 @@ type Database struct {
 	Name     string
 	Username string
 	Password string
-	Schema   string
 	Sslmode  string
 }
 
