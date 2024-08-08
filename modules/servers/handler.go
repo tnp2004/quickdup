@@ -8,9 +8,10 @@ import (
 )
 
 func (s *Server) RegisterRoutes() {
-	_ = s.server
+	api := s.server.Group("/api")
+	v1 := api.Group("/v1")
 
-	s.healthRoutes()
+	s.healthRoutes(v1)
 }
 
 type healthResp struct {
@@ -18,8 +19,8 @@ type healthResp struct {
 	Date    time.Time `json:"date"`
 }
 
-func (s *Server) healthRoutes() {
-	r := s.server.Group("/health")
+func (s *Server) healthRoutes(route *echo.Group) {
+	r := route.Group("/health")
 
 	r.GET("/server", func(c echo.Context) error {
 		resp := &healthResp{
