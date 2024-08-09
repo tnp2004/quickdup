@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/tnp2004/quickdup/modules/notes/notesController"
 )
 
 func (s *Server) RegisterRoutes() {
@@ -12,6 +13,9 @@ func (s *Server) RegisterRoutes() {
 	v1 := api.Group("/v1")
 
 	s.healthRoutes(v1)
+
+	notesController := notesController.NewNotesController(v1)
+	notesController.RegisterRoutes()
 }
 
 type healthResp struct {
