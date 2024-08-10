@@ -22,7 +22,7 @@ CREATE TABLE "users" (
 
 CREATE TABLE "notes" (
   "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() not null,
-  "user_id" uuid not null,
+  "user_id" uuid,
   "blocks" varchar not null,
   "created_at" timestamp DEFAULT CURRENT_TIMESTAMP not null,
   "updated_at" timestamp DEFAULT CURRENT_TIMESTAMP not null
