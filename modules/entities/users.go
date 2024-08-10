@@ -6,7 +6,7 @@ type UserEntity struct {
 	ID        string
 	Username  string
 	Email     string
-	Passowrd  string
+	Password  string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

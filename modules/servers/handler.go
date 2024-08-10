@@ -6,6 +6,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/tnp2004/quickdup/modules/notes/notesController"
+	"github.com/tnp2004/quickdup/modules/notes/notesRepository"
+	"github.com/tnp2004/quickdup/modules/notes/notesUsecase"
 )
 
 func (s *Server) RegisterRoutes() {
@@ -14,7 +16,9 @@ func (s *Server) RegisterRoutes() {
 
 	s.healthRoutes(v1)
 
-	notesController := notesController.NewNotesController(v1)
+	notesRepository := notesRepository.NewNotesRepositories(s.db)
+	notesUsecase := notesUsecase.NewNotesUsecase(notesRepository)
+	notesController := notesController.NewNotesController(notesUsecase, v1)
 	notesController.RegisterRoutes()
 }
 

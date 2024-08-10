@@ -4,6 +4,9 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/tnp2004/quickdup/modules/models"
+	"github.com/tnp2004/quickdup/modules/notes/notesUsecase"
+	"github.com/tnp2004/quickdup/pkg/utils"
 )
 
 type NotesController interface {
@@ -11,17 +14,27 @@ type NotesController interface {
 }
 
 type notesControllerImpl struct {
-	route *echo.Group
+	NotesUsecase notesUsecase.NotesUsecase
+	route        *echo.Group
 }
 
-func NewNotesController(route *echo.Group) NotesController {
-	return &notesControllerImpl{route}
+func NewNotesController(NotesUsecase notesUsecase.NotesUsecase, route *echo.Group) NotesController {
+	return &notesControllerImpl{NotesUsecase, route}
 }
 
-func (c *notesControllerImpl) RegisterRoutes() {
-	r := c.route.Group("/notes")
+func (ctrl *notesControllerImpl) RegisterRoutes() {
+	r := ctrl.route.Group("/notes")
 
-	r.GET("/test", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello from notes")
+	r.POST("/", func(c echo.Context) error {
+		req := new(models.InsertNoteRequest)
+		if err := utils.BindRequestBody(c, req); err != nil {
+			return utils.MessageResp(c, http.StatusBadRequest, "invalid body request")
+		}
+		resp, err := ctrl.NotesUsecase.AddNewNote(req)
+		if err != nil {
+			return utils.MessageResp(c, http.StatusInternalServerError, err.Error())
+		}
+
+		return c.JSON(http.StatusOK, resp)
 	})
 }
