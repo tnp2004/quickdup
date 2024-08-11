@@ -14,11 +14,11 @@ type NotesController interface {
 }
 
 type notesControllerImpl struct {
-	NotesUsecase notesUsecase.NotesUsecase
+	notesUsecase notesUsecase.NotesUsecase
 }
 
-func NewNotesController(NotesUsecase notesUsecase.NotesUsecase) NotesController {
-	return &notesControllerImpl{NotesUsecase}
+func NewNotesController(notesUsecase notesUsecase.NotesUsecase) NotesController {
+	return &notesControllerImpl{notesUsecase}
 }
 
 func (ctrl *notesControllerImpl) AddNewNote(c echo.Context) error {
@@ -26,7 +26,7 @@ func (ctrl *notesControllerImpl) AddNewNote(c echo.Context) error {
 	if err := utils.BindRequestBody(c, req); err != nil {
 		return utils.MessageResp(c, http.StatusBadRequest, "invalid body request")
 	}
-	resp, err := ctrl.NotesUsecase.AddNewNote(req)
+	resp, err := ctrl.notesUsecase.AddNewNote(req)
 	if err != nil {
 		return utils.MessageResp(c, http.StatusInternalServerError, err.Error())
 	}

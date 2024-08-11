@@ -15,7 +15,7 @@ type notesRepositoryImpl struct {
 	db databases.Database
 }
 
-func NewNotesRepositories(db databases.Database) NotesRepository {
+func NewNotesRepository(db databases.Database) NotesRepository {
 	return &notesRepositoryImpl{db}
 }
 

@@ -10,11 +10,11 @@ type NotesUsecase interface {
 }
 
 type notesUsecaseImpl struct {
-	NotesRepository notesRepository.NotesRepository
+	notesRepository notesRepository.NotesRepository
 }
 
-func NewNotesUsecase(NotesRepository notesRepository.NotesRepository) NotesUsecase {
-	return &notesUsecaseImpl{NotesRepository}
+func NewNotesUsecase(notesRepository notesRepository.NotesRepository) NotesUsecase {
+	return &notesUsecaseImpl{notesRepository}
 }
 
 func (u *notesUsecaseImpl) AddNewNote(req *models.InsertNoteRequest) (*models.InsertNoteResponse, error) {
@@ -23,10 +23,10 @@ func (u *notesUsecaseImpl) AddNewNote(req *models.InsertNoteRequest) (*models.In
 
 	if req.UserID == "" {
 		// no login
-		resp, err = u.NotesRepository.InsertNoteNoLogin(req)
+		resp, err = u.notesRepository.InsertNoteNoLogin(req)
 	} else {
 		// login
-		resp, err = u.NotesRepository.InsertNoteLogin(req)
+		resp, err = u.notesRepository.InsertNoteLogin(req)
 	}
 
 	if err != nil {

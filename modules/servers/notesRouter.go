@@ -9,7 +9,7 @@ import (
 func (s *Server) registerNotesRouter() {
 	r := s.server.Group("/api/v1/notes")
 
-	notesRepository := notesRepository.NewNotesRepositories(s.db)
+	notesRepository := notesRepository.NewNotesRepository(s.db)
 	notesUsecase := notesUsecase.NewNotesUsecase(notesRepository)
 	notesController := notesController.NewNotesController(notesUsecase)
 
