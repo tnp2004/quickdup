@@ -4,6 +4,7 @@ import (
 	"github.com/tnp2004/quickdup/modules/models"
 	"github.com/tnp2004/quickdup/modules/notes/notesException"
 	"github.com/tnp2004/quickdup/pkg/databases"
+	"github.com/tnp2004/quickdup/pkg/utils"
 )
 
 type NotesRepository interface {
@@ -34,7 +35,7 @@ func (r *notesRepositoryImpl) InsertNoteLogin(req *models.InsertNoteRequest) (*m
 // no login
 func (r *notesRepositoryImpl) InsertNoteNoLogin(req *models.InsertNoteRequest) (*models.InsertNoteResponse, error) {
 	resp := new(models.InsertNoteResponse)
-	args := []any{req.Blocks}
+	args := utils.MakeArgs(req.Blocks)
 	if err := r.db.QueryRowTransaction("INSERT INTO notes (blocks) VALUES ($1) RETURNING id;",
 		args, &resp.ID); err != nil {
 		return nil, &notesException.InsertNoteNoLogin{}
