@@ -22,8 +22,9 @@ func NewUsersRepository(db databases.Database) UsersRepository {
 }
 
 func (r *usersRepositoryImpl) InsertUser(req *models.UserRegisterRequest) error {
+	query := "INSERT INTO users (username,email,password) VALUES ($1,$2,$3);"
 	args := utils.MakeArgs(req.Username, req.Email, req.Password)
-	if err := r.db.ExecTransaction("INSERT INTO users (username,email,password) VALUES ($1,$2,$3);", args); err != nil {
+	if err := r.db.ExecTransaction(query, args); err != nil {
 		log.Printf("error insert user email %s. Error: %s", req.Email, err.Error())
 		return &usersexception.InsertUser{Email: req.Email}
 	}
