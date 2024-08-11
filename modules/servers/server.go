@@ -30,7 +30,7 @@ func NewServer(cfg *configs.Config, db databases.Database) *Server {
 }
 
 func (s *Server) Start() {
-	s.RegisterRoutes()
+	s.registerModuleRouters()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()

@@ -10,31 +10,26 @@ import (
 )
 
 type NotesController interface {
-	RegisterRoutes()
+	AddNewNote(c echo.Context) error
 }
 
 type notesControllerImpl struct {
 	NotesUsecase notesUsecase.NotesUsecase
-	route        *echo.Group
 }
 
-func NewNotesController(NotesUsecase notesUsecase.NotesUsecase, route *echo.Group) NotesController {
-	return &notesControllerImpl{NotesUsecase, route}
+func NewNotesController(NotesUsecase notesUsecase.NotesUsecase) NotesController {
+	return &notesControllerImpl{NotesUsecase}
 }
 
-func (ctrl *notesControllerImpl) RegisterRoutes() {
-	r := ctrl.route.Group("/notes")
+func (ctrl *notesControllerImpl) AddNewNote(c echo.Context) error {
+	req := new(models.InsertNoteRequest)
+	if err := utils.BindRequestBody(c, req); err != nil {
+		return utils.MessageResp(c, http.StatusBadRequest, "invalid body request")
+	}
+	resp, err := ctrl.NotesUsecase.AddNewNote(req)
+	if err != nil {
+		return utils.MessageResp(c, http.StatusInternalServerError, err.Error())
+	}
 
-	r.POST("/", func(c echo.Context) error {
-		req := new(models.InsertNoteRequest)
-		if err := utils.BindRequestBody(c, req); err != nil {
-			return utils.MessageResp(c, http.StatusBadRequest, "invalid body request")
-		}
-		resp, err := ctrl.NotesUsecase.AddNewNote(req)
-		if err != nil {
-			return utils.MessageResp(c, http.StatusInternalServerError, err.Error())
-		}
-
-		return c.JSON(http.StatusOK, resp)
-	})
+	return c.JSON(http.StatusOK, resp)
 }
