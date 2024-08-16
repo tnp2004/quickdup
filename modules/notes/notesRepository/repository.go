@@ -23,7 +23,7 @@ func NewNotesRepository(db databases.Database) NotesRepository {
 // login
 func (r *notesRepositoryImpl) InsertNoteLogin(req *models.InsertNoteRequest) (*models.InsertNoteResponse, error) {
 	resp := new(models.InsertNoteResponse)
-	args := []any{req.UserID, req.Blocks}
+	args := utils.MakeArgs(req.UserID, req.Blocks)
 	if err := r.db.QueryRowTransaction("INSERT INTO notes (user_id,blocks) VALUES ($1,$2) RETURNING id,user_id;",
 		args, &resp.ID, &resp.UserID); err != nil {
 		return nil, &notesException.InsertNoteLogin{}

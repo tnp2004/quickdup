@@ -1,4 +1,4 @@
-package usersexception
+package usersException
 
 import "fmt"
 
