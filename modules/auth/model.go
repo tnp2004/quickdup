@@ -10,3 +10,7 @@ type LoginAuthentication struct {
 	HashPassword string
 	Password     string
 }
+
+type CredentialsResponse struct {
+	AccessToken string `json:"accessToken"`
+}

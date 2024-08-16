@@ -38,8 +38,8 @@ type Auth struct {
 type Jwt struct {
 	AccessSecretKey            string
 	RefreshSecretKey           string
-	AccessTokenExpireDuration  uint
-	RefreshTokenExpireDuration uint
+	AccessTokenExpireDuration  int64
+	RefreshTokenExpireDuration int64
 }
 
 type Cloudinary struct {

@@ -8,12 +8,13 @@ import (
 	"github.com/tnp2004/quickdup/modules/auth/authException"
 )
 
-func (a *authImpl) genAccessKey(userID string) (string, error) {
+func (a *authImpl) generateAccessKey(userID string) (string, error) {
+	expiresAt := time.Now().Add(time.Duration(a.cfg.AccessTokenExpireDuration))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    "quickdup",
 		Subject:   userID,
 		Audience:  []string{"user"},
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(a.cfg.AccessTokenExpireDuration))),
+		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		NotBefore: jwt.NewNumericDate(time.Now()),
 	})
 	ss, err := token.SignedString([]byte(a.cfg.AccessSecretKey))
@@ -25,15 +26,16 @@ func (a *authImpl) genAccessKey(userID string) (string, error) {
 	return ss, nil
 }
 
-func (a *authImpl) genRefreshKey(userID string) (string, error) {
+func (a *authImpl) generateRefreshKey(userID string) (string, error) {
+	expiresAt := time.Now().Add(time.Second * time.Duration(a.cfg.RefreshTokenExpireDuration))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    "quickdup",
 		Subject:   userID,
 		Audience:  []string{"user"},
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(a.cfg.RefreshTokenExpireDuration))),
+		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		NotBefore: jwt.NewNumericDate(time.Now()),
 	})
-	ss, err := token.SignedString([]byte(a.cfg.AccessSecretKey))
+	ss, err := token.SignedString([]byte(a.cfg.RefreshSecretKey))
 	if err != nil {
 		log.Printf("error sign refresh token. Error: %s", err.Error())
 		return "", &authException.SignRefreshToken{}

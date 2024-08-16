@@ -19,6 +19,11 @@ type authImpl struct {
 	db  databases.Database
 }
 
+var (
+	refreshTokenCookieName = "refreshToken"
+	refreshTokenCookiePath = "/api/v1/auth/refreshtoken"
+)
+
 func NewAuth(cfg *configs.Jwt, db databases.Database) Auth {
 	return &authImpl{cfg, db}
 }
@@ -37,16 +42,19 @@ func (a *authImpl) Login(c echo.Context) error {
 		return utils.MessageResp(c, http.StatusUnauthorized, err.Error())
 	}
 
-	accessToken, err := a.genAccessKey(userLoginData.UserID)
+	accessToken, err := a.generateAccessKey(userLoginData.UserID)
 	if err != nil {
 		return utils.MessageResp(c, http.StatusUnauthorized, err.Error())
 	}
-	refreshToken, err := a.genAccessKey(userLoginData.UserID)
+	refreshToken, err := a.generateRefreshKey(userLoginData.UserID)
 	if err != nil {
 		return utils.MessageResp(c, http.StatusUnauthorized, err.Error())
 	}
 
-	return nil
+	refreshTokenCookie := setCookie(refreshTokenCookieName, refreshToken, refreshTokenCookiePath, int(a.cfg.RefreshTokenExpireDuration))
+	c.SetCookie(&refreshTokenCookie)
+
+	return utils.CustomResp(c, http.StatusOK, &CredentialsResponse{AccessToken: accessToken})
 }
 
 func (a *authImpl) LoginAuthentication(req *LoginAuthentication) error {
