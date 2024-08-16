@@ -27,3 +27,5 @@ go.work.sum
 
 .air.toml
 tmp
+
+Makefile
