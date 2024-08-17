@@ -1,11 +1,16 @@
-package auth
+package authModels
 
 type LoginRequest struct {
 	Email    string `json:"email" validate:"email,required"`
 	Password string `json:"password" validate:"required"`
 }
 
-type LoginAuthentication struct {
+type LoginResponse struct {
+	AccessToken  string
+	RefreshToken string
+}
+
+type Authentication struct {
 	UserID       string
 	HashPassword string
 	Password     string
@@ -13,4 +18,9 @@ type LoginAuthentication struct {
 
 type CredentialsResponse struct {
 	AccessToken string `json:"accessToken"`
+}
+
+type AuthorizationCredentials struct {
+	AccessToken  string
+	RefreshToken string
 }
