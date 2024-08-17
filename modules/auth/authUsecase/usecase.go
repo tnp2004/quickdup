@@ -14,8 +14,9 @@ import (
 )
 
 type AuthUsecase interface {
-	Login(req *authModels.LoginRequest) (*authModels.LoginResponse, error)
+	Login(req *authModels.LoginRequest) (*authModels.Credentials, error)
 	SetRefreshTokenCookie(refreshToken string) http.Cookie
+	RevokeToken(refreshToken string) (*authModels.Credentials, error)
 }
 
 type authUsecaseImpl struct {
@@ -33,33 +34,35 @@ var (
 	refreshTokenCookiePath = "/api/v1/auth/token/revoke"
 )
 
-func (u *authUsecaseImpl) Login(req *authModels.LoginRequest) (*authModels.LoginResponse, error) {
+func (u *authUsecaseImpl) Login(req *authModels.LoginRequest) (*authModels.Credentials, error) {
 	userLoginData, err := u.authRepository.QueryLoginData(req)
 	if err != nil {
-		return nil, &authException.Unauthorized{}
+		return nil, &authException.EmailNotFound{}
 	}
 
 	if err := u.authentication(userLoginData); err != nil {
-		return nil, &authException.Unauthorized{}
+		return nil, err
 	}
 
-	accessToken, err := u.generateAccessKey(userLoginData.UserID)
+	accessTokenExpiresAt := time.Now().Add(time.Second * time.Duration(u.jwtCfg.AccessTokenExpireDuration))
+	accessToken, err := u.generateAccessKey(userLoginData.UserID, jwt.NewNumericDate(accessTokenExpiresAt))
 	if err != nil {
-		return nil, &authException.Unauthorized{}
+		return nil, err
 	}
-	refreshToken, err := u.generateRefreshKey(userLoginData.UserID)
+	expiresAt := time.Now().Add(time.Second * time.Duration(u.jwtCfg.RefreshTokenExpireDuration))
+	refreshToken, err := u.generateRefreshKey(userLoginData.UserID, jwt.NewNumericDate(expiresAt))
 	if err != nil {
-		return nil, &authException.Unauthorized{}
+		return nil, err
 	}
 
 	if err := u.authRepository.InsertAuthorizationCredentials(&authModels.AuthorizationCredentials{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}); err != nil {
-		return nil, &authException.Unauthorized{}
+		return nil, err
 	}
 
-	return &authModels.LoginResponse{
+	return &authModels.Credentials{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
@@ -67,6 +70,60 @@ func (u *authUsecaseImpl) Login(req *authModels.LoginRequest) (*authModels.Login
 
 func (u *authUsecaseImpl) SetRefreshTokenCookie(refreshToken string) http.Cookie {
 	return utils.SetCookie(refreshTokenCookieName, refreshToken, refreshTokenCookiePath, int(u.jwtCfg.RefreshTokenExpireDuration))
+}
+
+func (u *authUsecaseImpl) RevokeToken(refreshToken string) (*authModels.Credentials, error) {
+	token, err := jwt.Parse(refreshToken, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, &authException.UnexpectedSigningMethod{}
+		}
+		return []byte(u.jwtCfg.RefreshSecretKey), nil
+	})
+	if err != nil {
+		log.Printf("error authorization. Error: %s", err.Error())
+		return nil, err
+	}
+
+	if !token.Valid {
+		log.Println("error invalid token")
+		return nil, err
+	}
+
+	if err := u.authRepository.DeleteCredential(refreshToken); err != nil {
+		return nil, err
+	}
+
+	userID, err := token.Claims.GetSubject()
+	if err != nil {
+		log.Printf("error get user id from token. Error: %s", err.Error())
+		return nil, &authException.RevokeToken{}
+	}
+	refreshTokenExpiresAt, err := token.Claims.GetExpirationTime()
+	if err != nil {
+		log.Printf("error get expiration time from token. Error: %s", err.Error())
+		return nil, &authException.RevokeToken{}
+	}
+	accessTokenExpiresAt := time.Now().Add(time.Second * time.Duration(u.jwtCfg.AccessTokenExpireDuration))
+	newAccessToken, err := u.generateAccessKey(userID, jwt.NewNumericDate(accessTokenExpiresAt))
+	if err != nil {
+		return nil, &authException.RevokeToken{}
+	}
+	newRefreshToken, err := u.generateRefreshKey(userID, refreshTokenExpiresAt)
+	if err != nil {
+		return nil, &authException.RevokeToken{}
+	}
+
+	if err := u.authRepository.InsertAuthorizationCredentials(&authModels.AuthorizationCredentials{
+		AccessToken:  newAccessToken,
+		RefreshToken: newRefreshToken,
+	}); err != nil {
+		return nil, &authException.RevokeToken{}
+	}
+
+	return &authModels.Credentials{
+		AccessToken:  newAccessToken,
+		RefreshToken: newRefreshToken,
+	}, nil
 }
 
 func (u *authUsecaseImpl) authentication(req *authModels.Authentication) error {
@@ -77,13 +134,12 @@ func (u *authUsecaseImpl) authentication(req *authModels.Authentication) error {
 	return nil
 }
 
-func (u *authUsecaseImpl) generateAccessKey(userID string) (string, error) {
-	expiresAt := time.Now().Add(time.Second * time.Duration(u.jwtCfg.AccessTokenExpireDuration))
+func (u *authUsecaseImpl) generateAccessKey(userID string, expiresAt *jwt.NumericDate) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    issuer,
 		Subject:   userID,
 		Audience:  []string{"user"},
-		ExpiresAt: jwt.NewNumericDate(expiresAt),
+		ExpiresAt: expiresAt,
 		NotBefore: jwt.NewNumericDate(time.Now()),
 	})
 	ss, err := token.SignedString([]byte(u.jwtCfg.AccessSecretKey))
@@ -95,13 +151,12 @@ func (u *authUsecaseImpl) generateAccessKey(userID string) (string, error) {
 	return ss, nil
 }
 
-func (u *authUsecaseImpl) generateRefreshKey(userID string) (string, error) {
-	expiresAt := time.Now().Add(time.Second * time.Duration(u.jwtCfg.RefreshTokenExpireDuration))
+func (u *authUsecaseImpl) generateRefreshKey(userID string, expiresAt *jwt.NumericDate) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    issuer,
 		Subject:   userID,
 		Audience:  []string{"user"},
-		ExpiresAt: jwt.NewNumericDate(expiresAt),
+		ExpiresAt: expiresAt,
 		NotBefore: jwt.NewNumericDate(time.Now()),
 	})
 	ss, err := token.SignedString([]byte(u.jwtCfg.RefreshSecretKey))

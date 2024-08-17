@@ -11,6 +11,7 @@ import (
 
 type AuthController interface {
 	Login(c echo.Context) error
+	RevokeToken(c echo.Context) error
 }
 
 type authControllerImpl struct {
@@ -28,6 +29,21 @@ func (ctrl *authControllerImpl) Login(c echo.Context) error {
 	}
 
 	credentials, err := ctrl.authUsecase.Login(req)
+	if err != nil {
+		return utils.MessageResp(c, http.StatusUnauthorized, err.Error())
+	}
+	refreshTokenCookie := ctrl.authUsecase.SetRefreshTokenCookie(credentials.RefreshToken)
+	c.SetCookie(&refreshTokenCookie)
+
+	return utils.CustomResp(c, http.StatusOK, &authModels.CredentialsResponse{AccessToken: credentials.AccessToken})
+}
+
+func (ctrl *authControllerImpl) RevokeToken(c echo.Context) error {
+	rftCookie, err := c.Cookie("rft")
+	if err != nil {
+		return utils.MessageResp(c, http.StatusBadRequest, "no credentials")
+	}
+	credentials, err := ctrl.authUsecase.RevokeToken(rftCookie.Value)
 	if err != nil {
 		return utils.MessageResp(c, http.StatusUnauthorized, err.Error())
 	}

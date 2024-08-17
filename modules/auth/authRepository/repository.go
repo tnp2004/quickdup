@@ -9,6 +9,7 @@ import (
 type AuthRository interface {
 	QueryLoginData(req *authModels.LoginRequest) (*authModels.Authentication, error)
 	InsertAuthorizationCredentials(req *authModels.AuthorizationCredentials) error
+	DeleteCredential(refreshToken string) error
 }
 
 type authRepositoryImpl struct {
@@ -34,6 +35,17 @@ func (a *authRepositoryImpl) QueryLoginData(req *authModels.LoginRequest) (*auth
 func (a *authRepositoryImpl) InsertAuthorizationCredentials(req *authModels.AuthorizationCredentials) error {
 	query := "INSERT INTO auth (access_token,refresh_token) VALUES ($1,$2);"
 	args := utils.MakeArgs(req.AccessToken, req.RefreshToken)
+
+	if err := a.db.ExecTransaction(query, args); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *authRepositoryImpl) DeleteCredential(refreshToken string) error {
+	query := "DELETE FROM auth WHERE refresh_token = $1;"
+	args := utils.MakeArgs(refreshToken)
 
 	if err := a.db.ExecTransaction(query, args); err != nil {
 		return err

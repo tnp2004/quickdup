@@ -14,5 +14,5 @@ func (s *Server) registerAuthRouter() {
 	authController := authController.NewAuthController(authUsecase)
 
 	r.POST("/login", authController.Login)
-	//r.POST("/refreshtoken", auth.RevokeToken)
+	r.POST("/token/revoke", authController.RevokeToken)
 }
