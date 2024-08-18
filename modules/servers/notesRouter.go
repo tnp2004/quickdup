@@ -14,4 +14,5 @@ func (s *Server) registerNotesRouter() {
 	notesController := notesController.NewNotesController(notesUsecase)
 
 	r.POST("/", notesController.AddNewNote)
+	r.POST("/code", notesController.GenerateCode)
 }

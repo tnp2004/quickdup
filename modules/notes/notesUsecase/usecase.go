@@ -2,11 +2,13 @@ package notesUsecase
 
 import (
 	"github.com/tnp2004/quickdup/modules/models"
+	"github.com/tnp2004/quickdup/modules/notes/notesException"
 	"github.com/tnp2004/quickdup/modules/notes/notesRepository"
 )
 
 type NotesUsecase interface {
-	AddNewNote(req *models.InsertNoteRequest) (*models.InsertNoteResponse, error)
+	AddNewNote(req *models.InsertNoteRequest) (*models.NoteCode, error)
+	GenerateCode(req *models.NoteCode) (*models.NoteCode, error)
 }
 
 type notesUsecaseImpl struct {
@@ -17,8 +19,8 @@ func NewNotesUsecase(notesRepository notesRepository.NotesRepository) NotesUseca
 	return &notesUsecaseImpl{notesRepository}
 }
 
-func (u *notesUsecaseImpl) AddNewNote(req *models.InsertNoteRequest) (*models.InsertNoteResponse, error) {
-	resp := new(models.InsertNoteResponse)
+func (u *notesUsecaseImpl) AddNewNote(req *models.InsertNoteRequest) (*models.NoteCode, error) {
+	resp := new(models.NoteDataID)
 	var err error
 
 	if req.UserID == "" {
@@ -32,6 +34,22 @@ func (u *notesUsecaseImpl) AddNewNote(req *models.InsertNoteRequest) (*models.In
 	if err != nil {
 		return nil, err
 	}
+	genCodeReq := &models.NoteCode{
+		NoteID: resp.NoteID,
+	}
+	codeResp, err := u.GenerateCode(genCodeReq)
+	if err != nil {
+		return nil, err
+	}
 
-	return resp, nil
+	return codeResp, nil
+}
+
+func (u *notesUsecaseImpl) GenerateCode(req *models.NoteCode) (*models.NoteCode, error) {
+	id, err := u.notesRepository.InsertNoteCode(req)
+	if err != nil {
+		return nil, &notesException.GenerateCode{}
+	}
+
+	return id, nil
 }

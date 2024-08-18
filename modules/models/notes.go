@@ -5,7 +5,12 @@ type InsertNoteRequest struct {
 	Blocks string `json:"blocks" validate:"required"`
 }
 
-type InsertNoteResponse struct {
-	ID     string `json:"ID"`
+type NoteDataID struct {
+	NoteID string `json:"noteID"`
 	UserID string `json:"userID"`
+}
+
+type NoteCode struct {
+	NoteID string `json:"noteID" validate:"required"`
+	Code   string `json:"code"`
 }

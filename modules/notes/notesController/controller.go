@@ -11,6 +11,7 @@ import (
 
 type NotesController interface {
 	AddNewNote(c echo.Context) error
+	GenerateCode(c echo.Context) error
 }
 
 type notesControllerImpl struct {
@@ -32,4 +33,18 @@ func (ctrl *notesControllerImpl) AddNewNote(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, resp)
+}
+
+func (ctrl *notesControllerImpl) GenerateCode(c echo.Context) error {
+	req := new(models.NoteCode)
+	if err := utils.BindRequestBody(c, req); err != nil {
+		return utils.MessageResp(c, http.StatusBadRequest, "invalid body request")
+	}
+	resp, err := ctrl.notesUsecase.GenerateCode(req)
+	if err != nil {
+		return utils.MessageResp(c, http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, resp)
+
 }
