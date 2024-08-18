@@ -17,6 +17,7 @@ func (s *Server) registerHealthRouter() {
 
 	r.GET("/server", s.serverHealth)
 	r.GET("/database", s.databaseHealth)
+
 }
 
 func (s *Server) serverHealth(c echo.Context) error {

@@ -10,6 +10,7 @@ type AuthRository interface {
 	QueryLoginData(req *authModels.LoginRequest) (*authModels.Authentication, error)
 	InsertAuthorizationCredentials(req *authModels.AuthorizationCredentials) error
 	DeleteCredential(refreshToken string) error
+	IsExistsCredential(accessToken string) error
 }
 
 type authRepositoryImpl struct {
@@ -37,6 +38,18 @@ func (a *authRepositoryImpl) InsertAuthorizationCredentials(req *authModels.Auth
 	args := utils.MakeArgs(req.AccessToken, req.RefreshToken)
 
 	if err := a.db.ExecTransaction(query, args); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *authRepositoryImpl) IsExistsCredential(accessToken string) error {
+	query := "SELECT id FROM auth WHERE access_token = $1 LIMIT 1;"
+	args := utils.MakeArgs(accessToken)
+
+	id := new(int)
+	if err := a.db.QueryRowTransaction(query, args, &id); err != nil {
 		return err
 	}
 
