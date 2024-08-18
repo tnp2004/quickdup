@@ -11,21 +11,24 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/tnp2004/quickdup/configs"
+	"github.com/tnp2004/quickdup/modules/auth/authMiddleware"
 	"github.com/tnp2004/quickdup/pkg/databases"
 )
 
 type Server struct {
-	cfg    *configs.Config
-	server *echo.Echo
-	db     databases.Database
+	cfg            *configs.Config
+	server         *echo.Echo
+	db             databases.Database
+	authMiddleware authMiddleware.AuthMiddleware
 }
 
-func NewServer(cfg *configs.Config, db databases.Database) *Server {
+func NewServer(cfg *configs.Config, db databases.Database, authMiddleware authMiddleware.AuthMiddleware) *Server {
 	e := echo.New()
 	return &Server{
-		cfg:    cfg,
-		server: e,
-		db:     db,
+		cfg:            cfg,
+		server:         e,
+		db:             db,
+		authMiddleware: authMiddleware,
 	}
 }
 

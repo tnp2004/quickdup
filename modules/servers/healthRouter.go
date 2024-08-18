@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/tnp2004/quickdup/modules/auth/authMiddleware"
 )
 
 type healthResp struct {
@@ -16,8 +15,8 @@ type healthResp struct {
 func (s *Server) registerHealthRouter() {
 	r := s.server.Group("/api/v1/health")
 
-	r.GET("/server", authMiddleware.Authorization(s.db, s.serverHealth))
-	r.GET("/database", authMiddleware.Authorization(s.db, s.databaseHealth))
+	r.GET("/server", s.authMiddleware.Authorization(s.serverHealth))
+	r.GET("/database", s.authMiddleware.Authorization(s.databaseHealth))
 
 }
 

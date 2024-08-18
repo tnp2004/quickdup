@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/tnp2004/quickdup/modules/auth/authMiddleware"
 )
 
 func (s *Server) registerModuleRouters() {
@@ -13,7 +12,7 @@ func (s *Server) registerModuleRouters() {
 	s.registerUsersRouter()
 	s.registerAuthRouter()
 
-	s.server.GET("/api/v1/test", authMiddleware.Authorization(s.db, func(c echo.Context) error {
+	s.server.GET("/api/v1/test", s.authMiddleware.Authorization(func(c echo.Context) error {
 		return c.String(http.StatusOK, "ok")
 	}))
 }

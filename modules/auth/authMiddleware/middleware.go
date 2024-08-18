@@ -14,7 +14,19 @@ import (
 	"github.com/tnp2004/quickdup/pkg/utils"
 )
 
-func Authorization(db databases.Database, next echo.HandlerFunc) echo.HandlerFunc {
+type AuthMiddleware interface {
+	Authorization(next echo.HandlerFunc) echo.HandlerFunc
+}
+
+type authMiddlewareImpl struct {
+	db databases.Database
+}
+
+func NewAuthMiddleware(db databases.Database) AuthMiddleware {
+	return &authMiddlewareImpl{db}
+}
+
+func (m *authMiddlewareImpl) Authorization(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cfg := configs.NewConfig()
 		accessToken := strings.TrimPrefix(c.Request().Header.Get("Authorization"), "Bearer ")
@@ -34,7 +46,7 @@ func Authorization(db databases.Database, next echo.HandlerFunc) echo.HandlerFun
 			return utils.MessageResp(c, http.StatusUnauthorized, "unauthorized")
 		}
 
-		repository := authRepository.NewAuthRepository(db)
+		repository := authRepository.NewAuthRepository(m.db)
 		if err := repository.IsExistsCredential(accessToken); err != nil {
 			log.Printf("error check credential. Error: %s", err.Error())
 			return utils.MessageResp(c, http.StatusUnauthorized, "token has been revoked")
