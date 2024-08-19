@@ -26,7 +26,7 @@ func (a *authRepositoryImpl) QueryLoginData(req *authModels.LoginRequest) (*auth
 	resp := new(authModels.Authentication)
 	args := utils.MakeArgs(req.Email)
 
-	if err := a.db.QueryRowTransaction(query, args, &resp.UserID, &resp.HashPassword); err != nil {
+	if err := a.db.QueryRow(query, args, &resp.UserID, &resp.HashPassword); err != nil {
 		return nil, err
 	}
 	resp.Password = req.Password
@@ -48,8 +48,8 @@ func (a *authRepositoryImpl) IsExistsCredential(accessToken string) error {
 	query := "SELECT id FROM auth WHERE access_token = $1 LIMIT 1;"
 	args := utils.MakeArgs(accessToken)
 
-	id := new(int)
-	if err := a.db.QueryRowTransaction(query, args, &id); err != nil {
+	id := new(string)
+	if err := a.db.QueryRow(query, args, &id); err != nil {
 		return err
 	}
 
