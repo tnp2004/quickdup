@@ -2,10 +2,39 @@
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Toolbar from "./toolbar";
+import { useState } from "react";
 
 export default function Editor() {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [StarterKit.configure({
+      heading: {
+        levels: [3],
+        HTMLAttributes: {
+          class: 'heading-3',
+        },
+      },
+      bold: {
+        HTMLAttributes: {
+          class: 'bold'
+        }
+      },
+      italic: {
+        HTMLAttributes: {
+          class: 'italic'
+        }
+      },
+      bulletList: {
+        HTMLAttributes: {
+          class: 'list list-disc font-bold'
+        }
+      },
+      blockquote: {
+        HTMLAttributes: {
+          class: 'quote'
+        }
+      }
+    })],
     content: "<p>Hello world</p>",
     editorProps: {
         attributes: {
@@ -14,18 +43,14 @@ export default function Editor() {
     }
   });
 
+  const [title, setTitle] = useState("Untitled")
+
   return (
     <div>
       <div className="w-1/2 mx-auto flex flex-col justify-center">
-        <div className="border-2 rounded mb-1 py-1 px-3">
-          <button
-            className="rounded"
-            onClick={() => editor?.chain().focus().toggleBold().run()}>bold</button>
-        </div>
-          <EditorContent
-            className="w-full mx-auto border-2 rounded"
-            editor={editor}
-          />
+          <input className="text-3xl font-bold mb-2 focus:outline-none bg-transparent" type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <Toolbar editor={editor} />
+          <EditorContent className="w-full mx-auto border-2 rounded shadow-sm" editor={editor}/>
       </div>
       <button onClick={() => console.log(editor?.getHTML())}>get html</button>
     </div>

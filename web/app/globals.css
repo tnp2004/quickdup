@@ -6,3 +6,23 @@ body {
     color: #0f172a;
     background-color: #fafafa;
 }
+
+/* h3 */
+.heading-3 {
+    @apply text-xl font-bold
+}
+
+.toolBtn {
+    @apply border-2 px-2 py-1 rounded-lg shadow-sm
+}
+
+/* list */
+ul, ol {
+    padding: 0 1rem;
+    margin: .5rem 1rem 1.25rem 0.4rem;
+    
+    li p {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+  }
