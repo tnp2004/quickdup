@@ -1,7 +1,9 @@
+import Editor from "@/components/editor";
+
 export default function CreateNote() {
   return (
     <div>
-      take a note
+      <Editor />
     </div>
-  );
+  )
 }

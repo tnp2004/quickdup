@@ -5,7 +5,7 @@ export default function Home() {
     <div>
       <div className="mx-auto w-fit flex flex-col justify-center gap-y-10 my-60">
         <p className="text-4xl text-sky-400 drop-shadow-md w-3/5 text-center font-bold mx-auto">
-          QuickNote is your go-to tool for sharing notes easy and swiftly with others.
+          Quickdup is your go-to tool for sharing notes easy and swiftly with others.
         </p>
         <p className="text-xl w-[45%] px-20 mx-auto text-center">
           No more clutter—just create, share, and watch your notes self-expire
