@@ -44,7 +44,7 @@ export default function Editor() {
   
   return (
     <div>
-      <div className="w-1/2 mx-auto flex flex-col justify-center">
+      <div className="w-1/2 my-10 mx-auto flex flex-col justify-center">
          <div className="flex justify-between">
           <input className="text-3xl font-bold focus:outline-none bg-transparent" type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
           <div className="flex gap-2">
