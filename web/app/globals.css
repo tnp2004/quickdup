@@ -7,13 +7,28 @@ body {
     background-color: #fafafa;
 }
 
-/* h3 */
-.heading-3 {
+h1 {
+    @apply text-3xl font-bold
+}
+
+h2 {
+    @apply text-2xl font-bold
+}
+
+h3 {
     @apply text-xl font-bold
 }
 
 .toolBtn {
-    @apply border-2 px-2 py-1 rounded-lg shadow-sm
+    @apply rounded-md bg-white px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50
+}
+
+.dropdownElement {
+    @apply block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900
+}
+
+.bulletList {
+    @apply list-disc
 }
 
 /* list */
