@@ -15,4 +15,5 @@ func (s *Server) registerNotesRouter() {
 
 	r.POST("/", notesController.AddNewNote)
 	r.POST("/code", notesController.GenerateCode)
+	r.GET("/:code", notesController.SearchNoteBody)
 }

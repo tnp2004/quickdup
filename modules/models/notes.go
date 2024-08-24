@@ -14,3 +14,7 @@ type NoteCode struct {
 	NoteID string `json:"noteID" validate:"required"`
 	Code   string `json:"code"`
 }
+
+type NoteBlocks struct {
+	Blocks string `json:"blocks"`
+}

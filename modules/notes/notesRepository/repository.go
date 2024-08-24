@@ -11,6 +11,7 @@ type NotesRepository interface {
 	InsertNoteLogin(noteEntity *models.InsertNoteRequest) (*models.NoteDataID, error)
 	InsertNoteNoLogin(noteEntity *models.InsertNoteRequest) (*models.NoteDataID, error)
 	InsertNoteCode(req *models.NoteCode) (*models.NoteCode, error)
+	FindCode(code string) (*models.NoteBlocks, error)
 }
 
 type notesRepositoryImpl struct {
@@ -57,6 +58,17 @@ func (r *notesRepositoryImpl) InsertNoteCode(req *models.NoteCode) (*models.Note
 	resp := &models.NoteCode{
 		NoteID: req.NoteID,
 		Code:   code,
+	}
+
+	return resp, nil
+}
+
+func (r *notesRepositoryImpl) FindCode(code string) (*models.NoteBlocks, error) {
+	query := "select blocks from notes where id = (select note_id from codes where id = $1 limit 1);"
+	args := utils.MakeArgs(code)
+	resp := new(models.NoteBlocks)
+	if err := r.db.QueryRow(query, args, &resp.Blocks); err != nil {
+		return nil, err
 	}
 
 	return resp, nil

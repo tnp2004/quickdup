@@ -9,6 +9,7 @@ import (
 type NotesUsecase interface {
 	AddNewNote(req *models.InsertNoteRequest) (*models.NoteCode, error)
 	GenerateCode(req *models.NoteCode) (*models.NoteCode, error)
+	SearchNoteBody(code string) (*models.NoteBlocks, error)
 }
 
 type notesUsecaseImpl struct {
@@ -52,4 +53,13 @@ func (u *notesUsecaseImpl) GenerateCode(req *models.NoteCode) (*models.NoteCode,
 	}
 
 	return id, nil
+}
+
+func (u *notesUsecaseImpl) SearchNoteBody(code string) (*models.NoteBlocks, error) {
+	resp, err := u.notesRepository.FindCode(code)
+	if err != nil {
+		return nil, &notesException.GetNoteBody{Code: code}
+	}
+
+	return resp, nil
 }

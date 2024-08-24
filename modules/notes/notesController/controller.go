@@ -12,6 +12,7 @@ import (
 type NotesController interface {
 	AddNewNote(c echo.Context) error
 	GenerateCode(c echo.Context) error
+	SearchNoteBody(c echo.Context) error
 }
 
 type notesControllerImpl struct {
@@ -47,4 +48,14 @@ func (ctrl *notesControllerImpl) GenerateCode(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, resp)
 
+}
+
+func (ctrl *notesControllerImpl) SearchNoteBody(c echo.Context) error {
+	code := c.Param("code")
+	resp, err := ctrl.notesUsecase.SearchNoteBody(code)
+	if err != nil {
+		return utils.MessageResp(c, http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, resp)
 }
