@@ -43,7 +43,7 @@ export default function Editor() {
 
   const [code, setCode] = useState<string>("")
   const shareNote = async () => {
-    const data = await(await fetch(`http://localhost:3000/api/create/notes`, {
+    const data = await(await fetch(`http://localhost:3000/api/notes/create`, {
       method: "POST",
       body: JSON.stringify({
         userID: "",

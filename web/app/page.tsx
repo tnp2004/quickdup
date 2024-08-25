@@ -12,7 +12,7 @@ export default function Home() {
           in few minutes. Perfect for quick thoughts, meeting recaps, or any
           information you need to pass along.
         </p>
-        <Link href={"/note/create"} className="border-2 border-sky-200 shadow-xl w-fit px-6 py-2 mx-auto font-bold rounded-lg bg-sky-400 hover:bg-sky-400/80 text-slate-50">
+        <Link href={"/notes/create"} className="border-2 border-sky-200 shadow-xl w-fit px-6 py-2 mx-auto font-bold rounded-lg bg-sky-400 hover:bg-sky-400/80 text-slate-50">
           take a note
         </Link>
       </div>
